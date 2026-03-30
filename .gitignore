@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.*
+.DS_Store
+dist/
+build/
+target/
+*.log
+backend_error*.log
+.vscode/

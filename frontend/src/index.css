@@ -1,0 +1,193 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+@theme {
+  --color-netflix-red: #E50914;
+  --color-netflix-black: #0b0b0b;
+  --color-netflix-dark: #141414;
+  --font-sans: 'Outfit', 'Inter', system-ui, sans-serif;
+}
+
+:root {
+  --netflix-red: #E50914;
+  --netflix-black: #0b0b0b;
+  --netflix-dark: #141414;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  background-color: var(--netflix-black);
+  color: #ffffff;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Navbar */
+.nav-glass {
+  background: rgba(11, 11, 11, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.3s ease;
+}
+
+.nav-dark {
+  background: var(--netflix-black);
+}
+
+/* Custom Horizontal Scroll */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Netflix Card Expansion */
+.netflix-card-shadow {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.netflix-card-shadow:hover {
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.4);
+  z-index: 50;
+}
+
+/* Glowing Buttons */
+.btn-netflix {
+  background: var(--netflix-red);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.2);
+}
+
+.btn-netflix:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 25px rgba(229, 9, 20, 0.6);
+  background: #f40a16;
+}
+
+/* Cinematic Gradients */
+.hero-gradient {
+  background: linear-gradient(to top, var(--netflix-black) 0%, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+.row-gradient-left {
+  background: linear-gradient(to right, var(--netflix-black) 0%, transparent 100%);
+}
+
+.row-gradient-right {
+  background: linear-gradient(to left, var(--netflix-black) 0%, transparent 100%);
+}
+
+/* Input Styles */
+.netflix-input {
+  background: #333333;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  padding: 1rem;
+  width: 100%;
+  outline: none;
+  transition: background 0.2s;
+}
+
+.netflix-input:focus {
+  background: #454545;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+/* Skeleton Dark */
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0
+  }
+
+  100% {
+    background-position: 468px 0
+  }
+}
+
+.skeleton-dark {
+  background: #1a1a1a;
+  background-image: linear-gradient(to right, #1a1a1a 0%, #2a2a2a 20%, #1a1a1a 40%, #1a1a1a 100%);
+  background-repeat: no-repeat;
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Transition classes */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Cart Specific */
+@keyframes cartSuccessScale {
+  0% {
+    transform: scale(1) translateX(0);
+  }
+
+  35% {
+    transform: scale(1.1) translateX(10px);
+  }
+
+  60% {
+    transform: scale(1.05) translateX(-3px);
+  }
+
+  100% {
+    transform: scale(1) translateX(0);
+  }
+}
+
+.cart-success-glow {
+  animation: cartSuccessScale 500ms ease-out forwards;
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
+}
