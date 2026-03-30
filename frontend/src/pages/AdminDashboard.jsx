@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { getAdminStats, getProducts, getCategories, getAllOrders, updateOrderStatus, deleteProduct, createProduct, updateProduct, createCategory, updateCategory, deleteCategory } from '../services/api'
 import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -12,9 +12,14 @@ export default function AdminDashboard() {
     const [showModal, setShowModal] = useState(false)
     const [editingItem, setEditingItem] = useState(null)
     const [categories, setCategories] = useState([])
+    const [expandedOrderId, setExpandedOrderId] = useState(null)
     const [formData, setFormData] = useState({
         name: '', description: '', price: '', stock: '', unit: '', imageUrl: '', categoryId: ''
     })
+
+    const toggleOrderDetails = (id) => {
+        setExpandedOrderId(expandedOrderId === id ? null : id)
+    }
 
     useEffect(() => {
         loadStats()
@@ -133,13 +138,10 @@ export default function AdminDashboard() {
         }
     }
 
-    const handleStatusMove = async (id, currentStatus) => {
-        const statuses = ['PLACED', 'PREPARING', 'DISPATCHED', 'DELIVERED']
-        const nextIdx = statuses.indexOf(currentStatus) + 1
-        if (nextIdx >= statuses.length) return
+    const handleStatusMove = async (id, targetStatus) => {
         try {
-            await updateOrderStatus(id, statuses[nextIdx])
-            toast.success('Progression updated')
+            await updateOrderStatus(id, targetStatus)
+            toast.success(`Order designated as ${targetStatus}`)
             loadTabContent()
         } catch (err) {
             toast.error('Failed to update progression')
@@ -250,7 +252,8 @@ export default function AdminDashboard() {
                                     ))
                                 ) : (
                                     items.map(item => (
-                                        <tr key={item.id} className="hover:bg-white/5 transition-colors group">
+                                        <React.Fragment key={item.id}>
+                                        <tr className="hover:bg-white/5 transition-colors group border-b border-white/10">
                                             {activeTab === 'products' ? (
                                                 <>
                                                     <td className="px-8 py-5">
@@ -277,11 +280,15 @@ export default function AdminDashboard() {
                                                     <td className="px-8 py-5 font-mono text-xs text-gray-500">#{item.id}</td>
                                                     <td className="px-8 py-5 font-bold">{item.customerName || 'Anonymous Director'}</td>
                                                     <td className="px-8 py-5 font-black">₹{parseFloat(item.totalAmount).toFixed(2)}</td>
-                                                    <td className="px-8 py-5 uppercase font-black text-[10px] tracking-widest italic">{item.orderStatus}</td>
+                                                    <td className="px-8 py-5 uppercase font-black text-[10px] tracking-widest italic">
+                                                        <span className={`px-2 py-1 rounded ${item.orderStatus === 'DELIVERED' ? 'bg-green-500/20 text-green-500' : 'bg-white/10'}`}>
+                                                            {item.orderStatus}
+                                                        </span>
+                                                    </td>
                                                     <td className="px-8 py-5">
-                                                        {item.orderStatus !== 'DELIVERED' && (
-                                                            <button onClick={() => handleStatusMove(item.id, item.orderStatus)} className="text-xs font-black uppercase text-netflix-red hover:underline">Finalize Phase →</button>
-                                                        )}
+                                                        <button onClick={() => toggleOrderDetails(item.id)} className="text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded transition-all">
+                                                            {expandedOrderId === item.id ? 'Hide Details' : 'View Details'}
+                                                        </button>
                                                     </td>
                                                 </>
                                             ) : (
@@ -304,6 +311,41 @@ export default function AdminDashboard() {
                                                 </>
                                             )}
                                         </tr>
+                                        {activeTab === 'orders' && expandedOrderId === item.id && (
+                                            <tr className="bg-[#0b0b0b]/60 border-b border-white/5">
+                                                <td colSpan="5" className="p-8">
+                                                    <div className="flex flex-col md:flex-row gap-8 justify-between">
+                                                        <div className="flex-1 space-y-4">
+                                                            <h4 className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Order Manifest / Items</h4>
+                                                            {item.orderItems && item.orderItems.length > 0 ? (
+                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                                    {item.orderItems.map((oi, idx) => (
+                                                                        <div key={idx} className="flex justify-between items-center bg-[#141414] p-3 rounded-lg border border-white/5">
+                                                                            <div className="flex items-center gap-3">
+                                                                                <div className="w-8 h-8 rounded bg-black flex items-center justify-center font-black text-xs text-netflix-red border border-white/10">
+                                                                                    {oi.quantity}x
+                                                                                </div>
+                                                                                <span className="font-medium text-sm text-gray-300">{oi.product?.name || oi.productName || 'Unknown Provision'}</span>
+                                                                            </div>
+                                                                            <span className="font-mono text-xs font-bold text-gray-500">₹{parseFloat(oi.price).toFixed(2)}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-sm text-gray-500 italic">No detailed manifest found.</p>
+                                                            )}
+                                                        </div>
+                                                        <div className="w-full md:w-64 space-y-3 md:pl-8 md:border-l border-white/10">
+                                                            <h4 className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">Action Controls</h4>
+                                                            <button onClick={() => handleStatusMove(item.id, 'PREPARING')} disabled={item.orderStatus !== 'PLACED'} className={`w-full py-3 rounded text-xs font-black uppercase transition-all tracking-wider ${item.orderStatus === 'PLACED' ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg' : 'bg-white/5 text-gray-600 cursor-not-allowed'}`}>Accept Order</button>
+                                                            <button onClick={() => handleStatusMove(item.id, 'DISPATCHED')} disabled={item.orderStatus !== 'PREPARING'} className={`w-full py-3 rounded text-xs font-black uppercase transition-all tracking-wider ${item.orderStatus === 'PREPARING' ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg' : 'bg-white/5 text-gray-600 cursor-not-allowed'}`}>Dispatch</button>
+                                                            <button onClick={() => handleStatusMove(item.id, 'DELIVERED')} disabled={item.orderStatus !== 'DISPATCHED'} className={`w-full py-3 rounded text-xs font-black uppercase transition-all tracking-wider ${item.orderStatus === 'DISPATCHED' ? 'bg-green-600 hover:bg-green-500 text-white shadow-lg' : 'bg-white/5 text-gray-600 cursor-not-allowed'}`}>Mark Delivered</button>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                        </React.Fragment>
                                     ))
                                 )}
                             </tbody>
